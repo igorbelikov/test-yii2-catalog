@@ -1,6 +1,8 @@
 # test-yii2-catalog
 Yii2 test application with categories and images uploads.
 
+WIKI https://github.com/igorbelikov/test-yii2-catalog/wiki
+
 Установка
 -------------------
 
