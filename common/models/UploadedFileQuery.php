@@ -3,11 +3,11 @@
 namespace common\models;
 
 /**
- * This is the ActiveQuery class for [[ItemFile]].
+ * This is the ActiveQuery class for [[UploadedFile]].
  *
- * @see ItemFile
+ * @see UploadedFile
  */
-class ItemFileQuery extends \yii\db\ActiveQuery
+class UploadedFileQuery extends \yii\db\ActiveQuery
 {
     /*public function active()
     {
@@ -16,7 +16,7 @@ class ItemFileQuery extends \yii\db\ActiveQuery
 
     /**
      * @inheritdoc
-     * @return ItemFile[]|array
+     * @return UploadedFile[]|array
      */
     public function all($db = null)
     {
@@ -25,19 +25,10 @@ class ItemFileQuery extends \yii\db\ActiveQuery
 
     /**
      * @inheritdoc
-     * @return ItemFile|array|null
+     * @return UploadedFile|array|null
      */
     public function one($db = null)
     {
         return parent::one($db);
-    }
-
-    /**
-     * @return $this
-     */
-    public function preview()
-    {
-        $this->where(['type' => ItemFile::TYPE_PREVIEW]);
-        return $this;
     }
 }

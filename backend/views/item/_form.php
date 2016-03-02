@@ -1,8 +1,9 @@
 <?php
 
 use kartik\file\FileInput;
-use yii\helpers\Html;
+use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use common\models\Tree;
 use common\models\ItemFile;
@@ -12,21 +13,35 @@ use common\models\ItemFile;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
+<?php
+$this->registerJs("
+function setItemImagePreview(el) {
+    $.post('" . Url::to(['file/set-item-image-preview']) . "', { id: $(el).data('key') }, function(data) {
+        $('.b-item-image-preview').removeClass('b-item-image-preview');
+        $(el).closest('.file-preview-frame').addClass('b-item-image-preview');
+    }, 'json');
+}
+", \yii\web\View::POS_HEAD);
+?>
+
 <div class="item-form">
 
     <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
 
-	<?= $form->field($model, 'images')->widget(FileInput::classname(), [
+	<?= $form->field($model, 'images[]')->widget(FileInput::classname(), [
 	    'options' => [
-            'accept' => 'image/*', 
+            'accept' => 'image/*',
             'multiple' => true,
-            'pluginOptions' => [
-                'showRemove' => false,
-                'showUpload' => false,
-                'showCaption' => false,
-                'initialPreview' => ItemFile::getInitialPreview($model),
-                'initialPreviewConfig' => ItemFile::getInitialPreviewConfig($model),
-            ],
+        ],
+        'pluginOptions' => [
+            'maxFileCount' => 5,
+            'showRemove' => false,
+            'showUpload' => false,
+            'showCaption' => false,
+            'overwriteInitial' => false,
+            'initialPreview' => ItemFile::getInitialPreview($model),
+            'initialPreviewConfig' => ItemFile::getInitialPreviewConfig($model),
+            'otherActionButtons' => '<button onclick="setItemImagePreview(this)" type="button" class="btn btn-default btn-xs js-set-item-image-preview" {dataKey}><span class="glyphicon glyphicon-star"></span></button>'
         ],
 	]) ?>
 

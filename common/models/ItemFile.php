@@ -2,7 +2,10 @@
 
 namespace common\models;
 
+use mdm\upload\FileModel;
 use Yii;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "{{%item_file}}".
@@ -15,26 +18,66 @@ use Yii;
  * @property UploadedFile $file
  * @property Item $item
  */
+
 class ItemFile extends \yii\db\ActiveRecord
 {
     const TYPE_DEFAULT = 1;
     const TYPE_PREVIEW = 2;
 
     /**
-     * @param common\models\Item $model
+     * @param $id
+     * @return bool
+     */
+    public static function setPreview($id)
+    {
+        $model = self::find()->where(['file_id' => $id])->one();
+        if (!$model) {
+            return false;
+        }
+        self::updateAll(['type' => self::TYPE_DEFAULT], ['item_id' => $model->item_id]);
+        $model->type = self::TYPE_PREVIEW;
+        return $model->save();
+    }
+
+    /**
+     * @param Item $model
+     * @param \yii\web\UploadedFile[] $files
+     */
+    public static function saveFiles($model, $files)
+    {
+        foreach ($files as $file) {
+            if($fileModel = FileModel::saveAs($file, '@common/upload')) {
+                $itemFile = new static();
+                $itemFile->file_id = $fileModel->id;
+                $itemFile->item_id = $model->id;
+                $itemFile->save();
+            }
+        }
+    }
+
+    /**
+     * @param \common\models\Item $model
      * @return array
      */
     public static function getInitialPreview($model)
     {
         $data = [];
         foreach ($model->getItemFiles()->all() as $file) {
-            $data[] = Html::img(['/file', 'id' => $file->file_id], ['class' => 'file-preview-image']);;
+            $data[] = Html::img($file->getFileUrl(), ['class' => 'file-preview-image']);
         }
         return $data;
     }
 
     /**
-     * @param common\models\Item $model
+     * @return string
+     */
+    public function getFileUrl()
+    {
+        return Url::to(['/file', 'id' => $this->file_id]);
+    }
+
+    /**
+     * @param \common\models\Item $model
      * @return array
      */
     public static function getInitialPreviewConfig($model)
@@ -42,29 +85,15 @@ class ItemFile extends \yii\db\ActiveRecord
         $data = [];
         foreach ($model->getItemFiles()->all() as $file) {
             $data[] = [
-                'key' => $file->id,
-                'url' => '#',
+                'key' => $file->file_id,
+                'url' => Url::to(['/file/delete', 'id' => $file->file_id]),
+                'frameClass' => $file->type == ItemFile::TYPE_PREVIEW ? 'b-item-image-preview' : null,
             ];
         }
         return $data;
     }
 
-    /**
-     * @return array
-     */
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => 'mdm\upload\UploadBehavior',
-                'attribute' => 'file', // required, use to receive input file
-                'savedAttribute' => 'file_id', // optional, use to link model with saved file.
-                'uploadPath' => '@common/upload', // saved directory. default to '@runtime/upload'
-                'autoSave' => true, // when true then uploaded file will be save before ActiveRecord::save()
-                'autoDelete' => true, // when true then uploaded file will deleted before ActiveRecord::delete()
-            ],
-        ];
-    }
+
 
     /**
      * @inheritdoc

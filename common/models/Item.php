@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use mdm\upload\FileModel;
 use Yii;
 
 /**
@@ -23,6 +24,22 @@ class Item extends \yii\db\ActiveRecord
     public $images;
 
     /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            $files = \yii\web\UploadedFile::getInstances($this, 'images');
+            if ($files) {
+                ItemFile::saveFiles($this, $files);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @inheritdoc
      */
     public static function tableName()
@@ -41,6 +58,13 @@ class Item extends \yii\db\ActiveRecord
             [['category_id'], 'integer'],
             [['title'], 'string', 'max' => 255],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Tree::className(), 'targetAttribute' => ['category_id' => 'id']],
+            ['images', 'image', 'extensions' => 'png, jpg, gif', 'maxFiles' => 5],
+            ['images', function ($attribute, $params) {
+                $files = \yii\web\UploadedFile::getInstances($this, 'images');
+                if ((count($files) + $this->getItemFiles()->count()) > 5) {
+                    $this->addError($attribute, 'Images must be less 5.');
+                }
+            }, 'whenClient' => ""]
         ];
     }
 

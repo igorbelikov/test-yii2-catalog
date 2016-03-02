@@ -2,11 +2,32 @@
 
 namespace frontend\controllers;
 
+use common\models\Item;
 use common\models\Tree;
+use Yii;
 use yii\data\ActiveDataProvider;
+use yii\web\NotFoundHttpException;
 
 class ItemController extends \yii\web\Controller
 {
+    public function actionView($id)
+    {
+        $model = Item::findOne($id);
+
+        if (!$model) {
+            throw new NotFoundHttpException(Yii::t('app', 'The requested item does not exist.'));
+        }
+
+        return $this->render('view', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * @param int $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
     public function actionCategory($id)
     {
         $model = $this->findModel($id);
@@ -26,6 +47,9 @@ class ItemController extends \yii\web\Controller
         ]);
     }
 
+    /**
+     * @return string
+     */
     public function actionIndex()
     {
     	$dataProvider = new ActiveDataProvider([
@@ -37,6 +61,11 @@ class ItemController extends \yii\web\Controller
     	]);
     }
 
+    /**
+     * @param $id
+     * @return null|static
+     * @throws NotFoundHttpException
+     */
     protected function findModel($id)
     {
         if (($model = Tree::findOne($id)) !== null) {

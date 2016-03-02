@@ -103,3 +103,7 @@ a.desc:after {
 .nav > li > form > button:hover {
     text-decoration: none;
 }
+
+.b-item-image-preview .js-set-item-image-preview {
+    border: 1px solid #333;
+}
