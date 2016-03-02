@@ -4,6 +4,11 @@ Yii2 test application with categories and images uploads.
 Установка
 -------------------
 
+Composer:
+```
+composer install
+```
+
 Инициализация:
 ```
 php init
