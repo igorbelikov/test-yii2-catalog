@@ -25,18 +25,16 @@ class Item extends \yii\db\ActiveRecord
 
     /**
      * @param bool $insert
+     * @param array $changedAttributes
      * @return bool
      */
-    public function beforeSave($insert)
+    public function afterSave($insert, $changedAttributes)
     {
-        if (parent::beforeSave($insert)) {
-            $files = \yii\web\UploadedFile::getInstances($this, 'images');
-            if ($files) {
-                ItemFile::saveFiles($this, $files);
-            }
-            return true;
+        parent::afterSave($insert, $changedAttributes);
+        $files = \yii\web\UploadedFile::getInstances($this, 'images');
+        if ($files) {
+            ItemFile::saveFiles($this, $files);
         }
-        return false;
     }
 
     /**
